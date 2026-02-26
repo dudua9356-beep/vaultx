@@ -1,1 +1,12 @@
+<h2>Painel Admin</h2>
 
+<form method="POST">
+    <input name="user_id" placeholder="ID do usuário">
+    <input name="amount" placeholder="Valor (+ ou -)">
+    <button type="submit">Alterar Saldo</button>
+</form>
+
+<h3>Usuários</h3>
+{% for user in users %}
+<p>ID: {{ user.id }} | {{ user.email }} | Saldo: {{ user.balance }}</p>
+{% endfor %}
