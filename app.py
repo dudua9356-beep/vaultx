@@ -1,85 +1,47 @@
-import os
-from flask import Flask, render_template, request, redirect, session
-from flask_sqlalchemy import SQLAlchemy
+from flask import Flask, render_template, redirect
+import requests
 
 app = Flask(__name__)
-app.secret_key = "vaultx_secret"
 
-# Banco
-app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL", "sqlite:///vaultx.db")
-app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+# Usuário fake temporário
+class User:
+    def __init__(self):
+        self.id = 1
+        self.balance = 10000.0
 
-db = SQLAlchemy(app)
-
-# ================= MODELO =================
-
-class User(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    email = db.Column(db.String(120), unique=True)
-    password = db.Column(db.String(120))
-    balance = db.Column(db.Float, default=10000.0)
-
-# ================= ROTAS =================
+user = User()
 
 @app.route("/")
 def home():
-    if "user_id" not in session:
-        return redirect("/login")
-    user = User.query.get(session["user_id"])
-    return render_template("dashboard.html", user=user)
+    return redirect("/dashboard")
 
-@app.route("/register", methods=["GET","POST"])
-def register():
-    if request.method == "POST":
-        email = request.form["email"]
-        password = request.form["password"]
-        new_user = User(email=email, password=password)
-        db.session.add(new_user)
-        db.session.commit()
-        return redirect("/login")
-    return render_template("register.html")
+@app.route("/dashboard")
+def dashboard():
+    response = requests.get(
+        "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd"
+    )
+    data = response.json()
+    btc_price = data["bitcoin"]["usd"]
 
-@app.route("/login", methods=["GET","POST"])
-def login():
-    if request.method == "POST":
-        email = request.form["email"]
-        password = request.form["password"]
-        user = User.query.filter_by(email=email, password=password).first()
-        if user:
-            session["user_id"] = user.id
-            return redirect("/")
-    return render_template("login.html")
+    return render_template(
+        "dashboard.html",
+        user=user,
+        btc_price=btc_price
+    )
 
 @app.route("/buy")
 def buy():
-    if "user_id" not in session:
-        return redirect("/login")
-    user = User.query.get(session["user_id"])
     user.balance -= 100
-    db.session.commit()
-    return redirect("/")
+    return redirect("/dashboard")
 
 @app.route("/sell")
 def sell():
-    if "user_id" not in session:
-        return redirect("/login")
-    user = User.query.get(session["user_id"])
     user.balance += 100
-    db.session.commit()
-    return redirect("/")
+    return redirect("/dashboard")
 
-@app.route("/admin-9482", methods=["GET","POST"])
+@app.route("/admin-9482")
 def admin():
-    if request.method == "POST":
-        user_id = request.form["user_id"]
-        amount = float(request.form["amount"])
-        user = User.query.get(user_id)
-        if user:
-            user.balance += amount
-            db.session.commit()
-    users = User.query.all()
-    return render_template("admin.html", users=users)
+    return "Área Admin"
 
-# 🔥 CRIA O BANCO AUTOMATICAMENTE NO RENDER
-with app.app_context():
-    db.create_all()
+if __name__ == "__main__":
+    app.run(debug=True)
