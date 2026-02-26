@@ -13,6 +13,7 @@ db = SQLAlchemy(app)
 
 # Modelo de usuário
 class User(db.Model):
+    __tablename__ = "users"  # <- evita conflito com palavra reservada
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.String(5), unique=True)  # ID aleatório de 5 dígitos
     username = db.Column(db.String(100))
@@ -25,7 +26,6 @@ with app.app_context():
 # Página principal / dashboard
 @app.route("/")
 def dashboard():
-    # Pega o primeiro usuário cadastrado só para demo
     user = User.query.first()
     if not user:
         return "Nenhum usuário criado ainda!"
@@ -46,6 +46,21 @@ def create_user():
 
     new_user = User(username=username, user_id=user_id)
     db.session.add(new_user)
+    db.session.commit()
+    return redirect("/")
+
+# Comprar / Vender fictício
+@app.route("/buy", methods=["POST"])
+def buy():
+    user = User.query.first()
+    user.balance -= 100  # exemplo simples
+    db.session.commit()
+    return redirect("/")
+
+@app.route("/sell", methods=["POST"])
+def sell():
+    user = User.query.first()
+    user.balance += 100  # exemplo simples
     db.session.commit()
     return redirect("/")
 
