@@ -19,11 +19,11 @@ def home():
 def dashboard():
     try:
         response = requests.get(
-            "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd",
+            "https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT",
             timeout=5
         )
         data = response.json()
-        btc_price = data["bitcoin"]["usd"]
+        btc_price = data["price"]
     except:
         btc_price = "Indisponível"
 
