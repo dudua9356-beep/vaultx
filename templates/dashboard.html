@@ -1,7 +1,106 @@
-<h2>VaultX Dashboard</h2>
-<p>ID: {{ user.id }}</p>
-<p>Saldo: {{ user.balance }} USDT (Fictício)</p>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>VaultX Dashboard</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #0d1117;
+            color: #ffffff;
+        }
 
-<a href="/buy">Comprar (-100)</a><br>
-<a href="/sell">Vender (+100)</a><br>
-<a href="/admin-9482">Admin</a>
+        .navbar {
+            background: #161b22;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 20px;
+            font-weight: bold;
+            color: #00ff99;
+        }
+
+        .container {
+            padding: 40px;
+        }
+
+        .card {
+            background: #161b22;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 0 20px rgba(0, 255, 153, 0.1);
+            max-width: 500px;
+        }
+
+        .balance {
+            font-size: 28px;
+            margin: 20px 0;
+            color: #00ff99;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 20px;
+            margin: 10px 5px 0 0;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+
+        .buy {
+            background: #00c853;
+            color: white;
+        }
+
+        .sell {
+            background: #d50000;
+            color: white;
+        }
+
+        .admin {
+            background: #2962ff;
+            color: white;
+        }
+
+        .btn:hover {
+            opacity: 0.8;
+        }
+
+        .id-box {
+            font-size: 14px;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+
+<div class="navbar">
+    <div class="logo">VaultX</div>
+    <div>ID: {{ user.id }}</div>
+</div>
+
+<div class="container">
+    <div class="card">
+        <h2>Dashboard</h2>
+
+        <div class="balance">
+            {{ user.balance }} USDT
+        </div>
+
+        <a href="/buy" class="btn buy">Comprar (-100)</a>
+        <a href="/sell" class="btn sell">Vender (+100)</a>
+        <a href="/admin-9482" class="btn admin">Admin</a>
+
+        <div class="id-box">
+            Saldo fictício para simulação
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
