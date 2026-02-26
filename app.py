@@ -5,13 +5,13 @@ from flask_sqlalchemy import SQLAlchemy
 app = Flask(__name__)
 app.secret_key = "vaultx_secret"
 
-# Banco PostgreSQL do Render
+# Banco
 app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL", "sqlite:///vaultx.db")
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 db = SQLAlchemy(app)
 
-# ================= MODELOS =================
+# ================= MODELO =================
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -52,6 +52,8 @@ def login():
 
 @app.route("/buy")
 def buy():
+    if "user_id" not in session:
+        return redirect("/login")
     user = User.query.get(session["user_id"])
     user.balance -= 100
     db.session.commit()
@@ -59,6 +61,8 @@ def buy():
 
 @app.route("/sell")
 def sell():
+    if "user_id" not in session:
+        return redirect("/login")
     user = User.query.get(session["user_id"])
     user.balance += 100
     db.session.commit()
@@ -76,9 +80,6 @@ def admin():
     users = User.query.all()
     return render_template("admin.html", users=users)
 
-# ================= RUN =================
-
-if __name__ == "__main__":
-    with app.app_context():
-        db.create_all()
-    app.run(debug=True)
+# 🔥 CRIA O BANCO AUTOMATICAMENTE NO RENDER
+with app.app_context():
+    db.create_all()
