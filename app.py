@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, redirect, session
-from .config import Config
-from .models import db, User
+from config import Config
+from models import db, User
 import random
 
 app = Flask(__name__)
@@ -9,7 +9,8 @@ app.config.from_object(Config)
 db.init_app(app)
 
 def generate_id():
-    return str(random.randint(10000,99999))
+    return str(random.randint(10000, 99999))
+
 
 @app.before_first_request
 def create_tables():
@@ -27,12 +28,14 @@ def create_tables():
         db.session.add(user)
         db.session.commit()
 
+
 @app.route("/")
 def dashboard():
 
     user = User.query.first()
 
     return render_template("dashboard.html", user=user)
+
 
 @app.route("/buy")
 def buy():
@@ -45,6 +48,7 @@ def buy():
 
     return redirect("/")
 
+
 @app.route("/sell")
 def sell():
 
@@ -55,6 +59,7 @@ def sell():
 
     return redirect("/")
 
+
 @app.route("/admin", methods=["GET","POST"])
 def admin_login():
 
@@ -62,11 +67,12 @@ def admin_login():
 
         password = request.form["password"]
 
-        if password == app.config["ADMIN_PASSWORD"]:
+        if password == "duduzin321@321":
             session["admin"] = True
             return redirect("/admin_panel")
 
     return render_template("admin_login.html")
+
 
 @app.route("/admin_panel", methods=["GET","POST"])
 def admin_panel():
@@ -88,3 +94,7 @@ def admin_panel():
             db.session.commit()
 
     return render_template("admin_panel.html", users=users)
+
+
+if __name__ == "__main__":
+    app.run()
