@@ -1,92 +1,49 @@
-from flask import Flask, render_template, request, redirect, session
-from config import Config
+from flask import Flask, render_template, request, redirect
+import os
 from models import db, User
-import random
 
 app = Flask(__name__)
-app.config.from_object(Config)
 
+# CONFIG
+app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL")
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "vaultx123")
+
+# INIT DB
 db.init_app(app)
 
-def generate_id():
-    return str(random.randint(10000,99999))
-
-
+# CREATE TABLES
 with app.app_context():
     db.create_all()
 
-    if User.query.count() == 0:
-        user = User(
-            user_id=generate_id(),
-            username="TraderDemo",
-            balance=10000
-        )
-        db.session.add(user)
-        db.session.commit()
-
-
+# HOME
 @app.route("/")
-def dashboard():
+def home():
+    users = User.query.all()
+    return render_template("index.html", users=users)
 
-    user = User.query.first()
+# CREATE USER
+@app.route("/create", methods=["POST"])
+def create_user():
+    username = request.form.get("username")
 
-    return render_template("dashboard.html", user=user)
+    user = User(username=username, balance=1000)
 
-
-@app.route("/buy")
-def buy():
-
-    user = User.query.first()
-
-    if user.balance >= 100:
-        user.balance -= 100
-        db.session.commit()
-
-    return redirect("/")
-
-
-@app.route("/sell")
-def sell():
-
-    user = User.query.first()
-
-    user.balance += 100
+    db.session.add(user)
     db.session.commit()
 
     return redirect("/")
 
+# ADD BALANCE
+@app.route("/add/<int:user_id>")
+def add_balance(user_id):
+    user = User.query.get(user_id)
 
-@app.route("/admin", methods=["GET","POST"])
-def admin_login():
+    if user:
+        user.balance += 100
+        db.session.commit()
 
-    if request.method == "POST":
+    return redirect("/")
 
-        password = request.form["password"]
-
-        if password == "duduzin321@321":
-            session["admin"] = True
-            return redirect("/admin_panel")
-
-    return render_template("admin_login.html")
-
-
-@app.route("/admin_panel", methods=["GET","POST"])
-def admin_panel():
-
-    if "admin" not in session:
-        return redirect("/admin")
-
-    users = User.query.all()
-
-    if request.method == "POST":
-
-        user_id = request.form["user_id"]
-        amount = float(request.form["amount"])
-
-        user = User.query.filter_by(user_id=user_id).first()
-
-        if user:
-            user.balance += amount
-            db.session.commit()
-
-    return render_template("admin_panel.html", users=users)
+if __name__ == "__main__":
+    app.run()
