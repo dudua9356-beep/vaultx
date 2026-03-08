@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="card">
+
+<h2>Dashboard</h2>
+
+<p><b>User ID:</b> {{user.user_id}}</p>
+<p><b>Username:</b> {{user.username}}</p>
+<p><b>Balance:</b> ${{user.balance}}</p>
+
+<br>
+
+<a href="/buy">
+<button class="buy">BUY (-100)</button>
+</a>
+
+<a href="/sell">
+<button class="sell">SELL (+100)</button>
+</a>
+
+</div>
+
+{% endblock %}
