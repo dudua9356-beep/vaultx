@@ -9,22 +9,18 @@ app.config.from_object(Config)
 db.init_app(app)
 
 def generate_id():
-    return str(random.randint(10000, 99999))
+    return str(random.randint(10000,99999))
 
 
-@app.before_first_request
-def create_tables():
-
+with app.app_context():
     db.create_all()
 
     if User.query.count() == 0:
-
         user = User(
             user_id=generate_id(),
             username="TraderDemo",
             balance=10000
         )
-
         db.session.add(user)
         db.session.commit()
 
@@ -94,7 +90,3 @@ def admin_panel():
             db.session.commit()
 
     return render_template("admin_panel.html", users=users)
-
-
-if __name__ == "__main__":
-    app.run()
