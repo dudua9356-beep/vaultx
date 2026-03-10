@@ -2,38 +2,20 @@
 
 {% block content %}
 
-<h2>Painel Admin</h2>
+<h1>Painel Admin</h1>
 
-<table>
+<h3>Usuários cadastrados</h3>
 
-<tr>
-<th>User ID</th>
-<th>Nome</th>
-<th>Saldo</th>
-</tr>
+{% for user in users %}
 
-{% for u in users %}
+<div class="card">
 
-<tr>
-<td>{{u.user_id}}</td>
-<td>{{u.username}}</td>
-<td>{{u.balance}}</td>
-</tr>
+<p>Usuário: {{ user.username }}</p>
+
+<p>Saldo: ${{ user.balance }}</p>
+
+</div>
 
 {% endfor %}
-
-</table>
-
-<h3>Adicionar saldo</h3>
-
-<form method="POST">
-
-<input name="user_id" placeholder="User ID">
-
-<input name="amount" placeholder="Valor">
-
-<button>Adicionar</button>
-
-</form>
 
 {% endblock %}
