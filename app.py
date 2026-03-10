@@ -4,6 +4,7 @@ import requests
 import os
 
 app = Flask(__name__)
+
 app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL")
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.secret_key = "vaultx_secret"
@@ -14,7 +15,9 @@ with app.app_context():
     db.create_all()
 
 
+# pegar preços das criptomoedas
 def get_prices():
+
     url = "https://api.coingecko.com/api/v3/simple/price"
 
     params = {
@@ -22,11 +25,47 @@ def get_prices():
         "vs_currencies": "usd"
     }
 
-    r = requests.get(url, params=params)
-    return r.json()
+    try:
+        r = requests.get(url, params=params, timeout=5)
+        data = r.json()
+        return data
+    except:
+        return {}
 
 
+# página inicial
 @app.route("/")
+def index():
+
+    prices = get_prices()
+    users = User.query.all()
+
+    return render_template(
+        "dashboard.html",
+        prices=prices,
+        users=users
+    )
+
+
+# login simples
+@app.route("/login", methods=["POST"])
+def login():
+
+    username = request.form["username"]
+
+    user = User.query.filter_by(username=username).first()
+
+    if not user:
+        user = User(username=username, balance=1000)
+
+        db.session.add(user)
+        db.session.commit()
+
+    return redirect("/")
+
+
+# dashboard
+@app.route("/dashboard")
 def dashboard():
 
     prices = get_prices()
@@ -39,44 +78,24 @@ def dashboard():
     )
 
 
-@app.route("/register", methods=["GET", "POST"])
-def register():
+# login admin
+@app.route("/admin_login", methods=["GET", "POST"])
+def admin_login():
 
     if request.method == "POST":
 
-        username = request.form["username"]
+        password = request.form["password"]
 
-        user = User(username=username, balance=1000)
+        if password == "vaultxadmin123":
 
-        db.session.add(user)
-        db.session.commit()
+            users = User.query.all()
 
-        return redirect("/")
+            return render_template(
+                "admin_panel.html",
+                users=users
+            )
 
-    return render_template("register.html")
-
-
-@app.route("/login", methods=["GET", "POST"])
-def login():
-
-    if request.method == "POST":
-
-        username = request.form["username"]
-
-        user = User.query.filter_by(username=username).first()
-
-        if user:
-            return redirect("/")
-
-    return render_template("login.html")
-
-
-@app.route("/admin")
-def admin():
-
-    users = User.query.all()
-
-    return render_template("admin.html", users=users)
+    return render_template("admin_login.html")
 
 
 if __name__ == "__main__":
