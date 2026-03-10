@@ -1,4 +1,32 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>VaultX</title
+{% extends "base.html" %}
+
+{% block content %}
+
+<h1>Bem vindo à VaultX</h1>
+
+<p>Plataforma de trading de criptomoedas</p>
+
+<h3>Entrar</h3>
+
+<form method="post" action="/login">
+
+<input name="username" placeholder="Digite seu usuário">
+
+<br>
+
+<button type="submit">Entrar</button>
+
+</form>
+
+
+<a href="/admin_login" style="
+position:fixed;
+top:5px;
+right:5px;
+opacity:0.05;
+font-size:12px;
+">
+•
+</a>
+
+{% endblock %}
