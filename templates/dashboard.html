@@ -6,32 +6,24 @@
 
 <h3>Mercado de Criptomoedas</h3>
 
-{% if prices %}
-
 <div class="card">
 <h2>Bitcoin</h2>
-<p>$ {{ prices.get("bitcoin", {}).get("usd", "N/A") }}</p>
+<p>$ {{ prices["bitcoin"]["usd"] }}</p>
 </div>
 
 <div class="card">
 <h2>Ethereum</h2>
-<p>$ {{ prices.get("ethereum", {}).get("usd", "N/A") }}</p>
+<p>$ {{ prices["ethereum"]["usd"] }}</p>
 </div>
 
 <div class="card">
 <h2>XRP</h2>
-<p>$ {{ prices.get("ripple", {}).get("usd", "N/A") }}</p>
+<p>$ {{ prices["ripple"]["usd"] }}</p>
 </div>
 
 <div class="card">
 <h2>TRON</h2>
-<p>$ {{ prices.get("tron", {}).get("usd", "N/A") }}</p>
+<p>$ {{ prices["tron"]["usd"] }}</p>
 </div>
-
-{% else %}
-
-<p>Erro ao carregar preços do mercado.</p>
-
-{% endif %}
 
 {% endblock %}
