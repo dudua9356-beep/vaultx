@@ -1,50 +1,83 @@
 from flask import Flask, render_template, request, redirect
-import os
 from models import db, User
+import requests
+import os
 
 app = Flask(__name__)
-
-# CONFIG
-app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL")
+app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL")
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "vaultx123")
+app.secret_key = "vaultx_secret"
 
-# INIT DB
 db.init_app(app)
 
-# RESET DATABASE (remove tabelas antigas com erro)
 with app.app_context():
-    db.drop_all()
     db.create_all()
 
-# HOME
+
+def get_prices():
+    url = "https://api.coingecko.com/api/v3/simple/price"
+
+    params = {
+        "ids": "bitcoin,ethereum,ripple,tron",
+        "vs_currencies": "usd"
+    }
+
+    r = requests.get(url, params=params)
+    return r.json()
+
+
 @app.route("/")
-def home():
+def dashboard():
+
+    prices = get_prices()
     users = User.query.all()
-    return render_template("index.html", users=users)
 
-# CRIAR USUÁRIO
-@app.route("/create", methods=["POST"])
-def create_user():
-    username = request.form.get("username")
+    return render_template(
+        "dashboard.html",
+        prices=prices,
+        users=users
+    )
 
-    if username:
+
+@app.route("/register", methods=["GET", "POST"])
+def register():
+
+    if request.method == "POST":
+
+        username = request.form["username"]
+
         user = User(username=username, balance=1000)
+
         db.session.add(user)
         db.session.commit()
 
-    return redirect("/")
+        return redirect("/")
 
-# ADICIONAR SALDO
-@app.route("/add/<int:user_id>")
-def add_balance(user_id):
-    user = User.query.get(user_id)
+    return render_template("register.html")
 
-    if user:
-        user.balance += 100
-        db.session.commit()
 
-    return redirect("/")
+@app.route("/login", methods=["GET", "POST"])
+def login():
+
+    if request.method == "POST":
+
+        username = request.form["username"]
+
+        user = User.query.filter_by(username=username).first()
+
+        if user:
+            return redirect("/")
+
+    return render_template("login.html")
+
+
+@app.route("/admin")
+def admin():
+
+    users = User.query.all()
+
+    return render_template("admin.html", users=users)
+
 
 if __name__ == "__main__":
     app.run()
