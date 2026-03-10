@@ -26,11 +26,25 @@ def get_prices():
     }
 
     try:
-        r = requests.get(url, params=params, timeout=5)
+
+        r = requests.get(url, params=params, timeout=10)
+
         data = r.json()
-        return data
+
+        if "bitcoin" in data:
+            return data
+
     except:
-        return {}
+        pass
+
+
+    # fallback caso a API falhe
+    return {
+        "bitcoin": {"usd": 65000},
+        "ethereum": {"usd": 3500},
+        "ripple": {"usd": 0.60},
+        "tron": {"usd": 0.12}
+    }
 
 
 # página inicial
@@ -38,6 +52,7 @@ def get_prices():
 def index():
 
     prices = get_prices()
+
     users = User.query.all()
 
     return render_template(
@@ -56,7 +71,11 @@ def login():
     user = User.query.filter_by(username=username).first()
 
     if not user:
-        user = User(username=username, balance=1000)
+
+        user = User(
+            username=username,
+            balance=1000
+        )
 
         db.session.add(user)
         db.session.commit()
@@ -69,6 +88,7 @@ def login():
 def dashboard():
 
     prices = get_prices()
+
     users = User.query.all()
 
     return render_template(
